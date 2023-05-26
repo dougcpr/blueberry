@@ -17,7 +17,7 @@ export async function POST(req: Request) {
 
   const response = await fetch("https://api.openai.com/v1/audio/transcriptions", {
     headers: {
-      "Content-Type": "multipart/form-data",
+      ContentType: 'multipart/form-data',
       Authorization: `Bearer ${process.env.OPENAI_API_KEY ?? ""}`,
     },
     method: "POST",

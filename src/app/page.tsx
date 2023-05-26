@@ -3,7 +3,6 @@ import React, {useState} from "react";
 import {Question, roles} from "@/app/mockData";
 import {useReactMediaRecorder} from "react-media-recorder";
 
-
 const prompt = `Given these questions and answers, determine`
 
 function Home() {
@@ -15,8 +14,9 @@ function Home() {
     audio: true,
     onStop:async (blobUrl, blob) => {
       const formData = new FormData();
+      const file = new File([blob], "input.wav", { type: "audio/wav" });
+      formData.append("file", file);
       formData.append("model", "whisper-1");
-      formData.append("file", blob);
       setWhisperPayload(formData)
     }
   });
@@ -38,7 +38,6 @@ function Home() {
     }
     const res = await response.json()
     console.log(res)
-    // recordedAnswers[questionIndex] = summary.choices[0].text
     setLoading(false)
   }
 
