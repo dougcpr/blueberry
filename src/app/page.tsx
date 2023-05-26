@@ -1,95 +1,89 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+'use client';
+import React, {useState} from "react";
+import {Question, roles} from "@/app/mockData";
+import {useReactMediaRecorder} from "react-media-recorder";
 
-export default function Home() {
+
+const prompt = `Given these questions and answers, determine`
+
+function Home() {
+  const [recordedAnswers, setRecordedAnswers] = useState<string[]>([])
+  const [summary, setSummary] = useState<string>('')
+  const [loading, setLoading] = useState(false)
+  const [whisperPayload, setWhisperPayload] = useState<FormData>()
+  const { status, startRecording, stopRecording, mediaBlobUrl,  } = useReactMediaRecorder({
+    audio: true,
+    onStop:async (blobUrl, blob) => {
+      const formData = new FormData();
+      formData.append("model", "whisper-1");
+      formData.append("file", blob);
+      setWhisperPayload(formData)
+    }
+  });
+  async function convertSpeechToText(questionIndex: number) {
+    setLoading(true)
+
+    const response = await fetch("/api/whisper", {
+      method: "POST",
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      body: whisperPayload,
+      // @ts-ignore
+      duplex: "half"
+    })
+
+    if (!response.ok) {
+      throw new Error(response.statusText)
+    }
+    const res = await response.json()
+    console.log(res)
+    // recordedAnswers[questionIndex] = summary.choices[0].text
+    setLoading(false)
+  }
+
+  function generateFeedback() {
+
+  }
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
+    <main style={{display: "grid", gridGap: "1rem"}}>
+      <h3>Interview Questions</h3>
+      <div style={{padding: "1rem", border: "1px solid", maxHeight: "15rem", overflowY: "scroll"}}>
+        {roles[0].questions.map((question: Question) => {
+          return (
+            <div key={question.id}>
+              <div style={{paddingBottom: "1rem"}}>
+                {question.question}
+              </div>
+              {status !== 'recording' ? <button
+                disabled={loading}
+                type="button"
+                style={{width: "fit-content"}}
+                onClick={() => startRecording()}>
+                Record Answer
+              </button> : <button onClick={stopRecording}>Stop Recording</button>}
+              <button onClick={() => convertSpeechToText(question.id)}>Convert STT</button>
+              <div style={{paddingTop: "1rem"}}>
+                <audio src={mediaBlobUrl} controls />
+              </div>
+              <div>{recordedAnswers[question.id]}</div>
+            </div>
+          )
+        })}
       </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
+      <button
+        disabled={loading}
+        type="button"
+        style={{width: "fit-content"}}
+        onClick={() => generateFeedback()}>
+        Generate Feedback
+      </button>
+      <div style={{display: "grid", gridGap: "1rem"}}>
+        {summary}
       </div>
     </main>
   )
 }
+
+export default Home
