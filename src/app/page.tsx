@@ -7,27 +7,23 @@ const prompt = `Given these questions and answers, determine`
 
 function Home() {
   const [recordedAnswers, setRecordedAnswers] = useState<string[]>([])
-  const [summary, setSummary] = useState<string>('')
   const [loading, setLoading] = useState(false)
-  const [whisperPayload, setWhisperPayload] = useState<FormData>()
+  const [whisperPayload, setWhisperPayload] = useState<any>()
   const { status, startRecording, stopRecording, mediaBlobUrl,  } = useReactMediaRecorder({
     audio: true,
     onStop:async (blobUrl, blob) => {
-      const formData = new FormData();
-      const file = new File([blob], "input.wav", { type: "audio/wav" });
-      formData.append("file", file);
-      formData.append("model", "whisper-1");
-      setWhisperPayload(formData)
+      const data = new FormData();
+      data.append("file", blob);
+      data.append("model", "whisper-1");
+      data.append("language", "en");
+      setWhisperPayload(data)
     }
   });
-  async function convertSpeechToText(questionIndex: number) {
+  async function convertSpeechToText() {
     setLoading(true)
 
     const response = await fetch("/api/whisper", {
       method: "POST",
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
       body: whisperPayload,
       // @ts-ignore
       duplex: "half"
@@ -39,10 +35,6 @@ function Home() {
     const res = await response.json()
     console.log(res)
     setLoading(false)
-  }
-
-  function generateFeedback() {
-
   }
 
   return (
@@ -62,7 +54,7 @@ function Home() {
                 onClick={() => startRecording()}>
                 Record Answer
               </button> : <button onClick={stopRecording}>Stop Recording</button>}
-              <button onClick={() => convertSpeechToText(question.id)}>Convert STT</button>
+              <button onClick={() => convertSpeechToText()}>Convert STT</button>
               <div style={{paddingTop: "1rem"}}>
                 <audio src={mediaBlobUrl} controls />
               </div>
@@ -70,16 +62,6 @@ function Home() {
             </div>
           )
         })}
-      </div>
-      <button
-        disabled={loading}
-        type="button"
-        style={{width: "fit-content"}}
-        onClick={() => generateFeedback()}>
-        Generate Feedback
-      </button>
-      <div style={{display: "grid", gridGap: "1rem"}}>
-        {summary}
       </div>
     </main>
   )
