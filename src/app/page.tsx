@@ -1,32 +1,26 @@
 'use client';
+import 'regenerator-runtime/runtime'
 import React, {useState} from "react";
 import {Question, roles} from "@/app/mockData";
-import {useReactMediaRecorder} from "react-media-recorder";
+import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
+
 
 const prompt = `Given these questions and answers, determine`
 
 function Home() {
-  const [recordedAnswers, setRecordedAnswers] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
-  const [whisperPayload, setWhisperPayload] = useState<any>()
-  const { status, startRecording, stopRecording, mediaBlobUrl,  } = useReactMediaRecorder({
-    audio: true,
-    onStop:async (blobUrl, blob) => {
-      const data = new FormData();
-      data.append("file", blob);
-      data.append("model", "whisper-1");
-      data.append("language", "en");
-      setWhisperPayload(data)
-    }
-  });
+  const {
+    transcript,
+    listening,
+    resetTranscript,
+    browserSupportsSpeechRecognition
+  } = useSpeechRecognition();
   async function convertSpeechToText() {
     setLoading(true)
 
-    const response = await fetch("/api/whisper", {
+    const response = await fetch("/api/generate", {
       method: "POST",
-      body: whisperPayload,
-      // @ts-ignore
-      duplex: "half"
+      body: null
     })
 
     if (!response.ok) {
@@ -35,6 +29,10 @@ function Home() {
     const res = await response.json()
     console.log(res)
     setLoading(false)
+  }
+
+  if (!browserSupportsSpeechRecognition) {
+    return <span>Browser does not support speech recognition.</span>;
   }
 
   return (
@@ -47,21 +45,17 @@ function Home() {
               <div style={{paddingBottom: "1rem"}}>
                 {question.question}
               </div>
-              {status !== 'recording' ? <button
-                disabled={loading}
-                type="button"
-                style={{width: "fit-content"}}
-                onClick={() => startRecording()}>
-                Record Answer
-              </button> : <button onClick={stopRecording}>Stop Recording</button>}
-              <button onClick={() => convertSpeechToText()}>Convert STT</button>
-              <div style={{paddingTop: "1rem"}}>
-                <audio src={mediaBlobUrl} controls />
-              </div>
-              <div>{recordedAnswers[question.id]}</div>
+              <button onClick={convertSpeechToText}>Record Answer</button>
             </div>
           )
         })}
+      </div>
+      <div>
+        <p>Microphone: {listening ? 'on' : 'off'}</p>
+        <button onClick={() => SpeechRecognition.startListening()}>Start</button>
+        <button onClick={() => SpeechRecognition.stopListening()}>Stop</button>
+        <button onClick={() => resetTranscript()}>Reset</button>
+        <p>{transcript}</p>
       </div>
     </main>
   )
