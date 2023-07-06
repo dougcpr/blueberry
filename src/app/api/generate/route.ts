@@ -1,26 +1,5 @@
 import {NextResponse} from "next/server";
-
-type OpenAIModel = {
-  data: OpenAIModelMetaData[];
-  object: string;
-}
-
-type OpenAIModelMetaData = {
-  id: string;
-  object: string;
-  owned_by: string;
-  permission: any;
-}
-
-type OpenAIPayload = {
-  model: string;
-  prompt: string;
-  temperature: number;
-  top_p: number;
-  frequency_penalty: number;
-  presence_penalty: number;
-  max_tokens: number;
-}
+import {OpenAIModel, OpenAIPayload} from "@/app/api/models/openai";
 
 export async function POST(req: Request) {
 
@@ -46,5 +25,6 @@ export async function POST(req: Request) {
   });
 
   const json: OpenAIModel = await response.json();
+  console.log(json)
   return NextResponse.json(json);
 }

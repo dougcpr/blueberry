@@ -1,34 +1,67 @@
 'use client';
 import 'regenerator-runtime/runtime'
 import React, {useState} from "react";
-import {Question, roles} from "@/app/mockData";
-import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
+import {useFormik} from 'formik';
+import SpeechRecognition, {useSpeechRecognition} from 'react-speech-recognition';
 
 
-const prompt = `Given these questions and answers, determine`
+let prompt = ``
 
 function Home() {
-  const [loading, setLoading] = useState(false)
+  const [interviewQuestion, setInterviewQuestion] = useState(undefined)
+  const [feedback, setFeedback] = useState(undefined)
   const {
     transcript,
     listening,
     resetTranscript,
     browserSupportsSpeechRecognition
   } = useSpeechRecognition();
-  async function convertSpeechToText() {
-    setLoading(true)
+  const formik = useFormik({
+    initialValues: {
+      role: '',
+      userExperience: 0,
+    },
+    onSubmit: async (values) => {
+      await generateInterviewQuestion()
+    },
+  });
 
+  async function completeResponse(prompt: string) {
+    console.log(prompt)
     const response = await fetch("/api/generate", {
       method: "POST",
-      body: null
-    })
+      headers: {"Content-Type": "application/json",},
+      body: JSON.stringify({prompt}),
+    });
 
     if (!response.ok) {
       throw new Error(response.statusText)
     }
-    const res = await response.json()
-    console.log(res)
-    setLoading(false)
+    return await response.json()
+  }
+
+  async function generateInterviewQuestion() {
+    let prompt = generateInterviewPrompt()
+    const res = await completeResponse(prompt)
+    setInterviewQuestion(res.choices[0].text)
+  }
+
+  async function generateFeedback() {
+    prompt = generateFeedbackPrompt()
+    const res = await completeResponse(prompt)
+    setFeedback(res.choices[0].text)
+  }
+
+  function generateInterviewPrompt() {
+    const feedbackContext = `Assume you are a hiring manager for ${formik.values.role}.`
+    return`${feedbackContext} Ask 1 question to the interviewee given their experience is ${formik.values.userExperience}..`
+  }
+
+  function generateFeedbackPrompt() {
+    const feedbackContext = `Assume you are a hiring manager for ${formik.values.role}.`
+    return `${feedbackContext} Give 1 pro and con as feedback. Rate the overall answer out of 10. 
+    The rating should be based on the user's experience of ${formik.values.userExperience}.
+    The answer the user gave is ${transcript}.`
   }
 
   if (!browserSupportsSpeechRecognition) {
@@ -37,26 +70,56 @@ function Home() {
 
   return (
     <main style={{display: "grid", gridGap: "1rem"}}>
-      <h3>Interview Questions</h3>
-      <div style={{padding: "1rem", border: "1px solid", maxHeight: "15rem", overflowY: "scroll"}}>
-        {roles[0].questions.map((question: Question) => {
-          return (
-            <div key={question.id}>
-              <div style={{paddingBottom: "1rem"}}>
-                {question.question}
+      <form onSubmit={formik.handleSubmit}>
+        <label htmlFor="role">Role Applying For</label>
+        <select
+          id="role"
+          name="role"
+          onChange={formik.handleChange}
+          value={formik.values.role}
+        >
+          <option value="" label="Select a role">
+            Select a color
+          </option>
+          <option value="junior react developer" label="Junior React Developer">
+            Junior Developer
+          </option>
+          <option value="math teacher" label="Math Teacher">
+            Teacher
+          </option>
+        </select>
+        <div>
+          <label htmlFor="userExperience">User Experience</label>
+          <input
+            id="userExperience"
+            name="userExperience"
+            type="number"
+            onChange={formik.handleChange}
+            value={formik.values.userExperience}
+          />
+        </div>
+        <button type="submit">Generate Interview Question</button>
+      </form>
+      {interviewQuestion &&
+          <div>
+              <h3>Interview Question:</h3>
+              <p>{interviewQuestion}</p>
+              <div>
+                  <p>Microphone: {listening ? 'on' : 'off'}</p>
+                  <button onClick={() => SpeechRecognition.startListening()}>Start</button>
+                  <button onClick={() => SpeechRecognition.stopListening()}>Stop</button>
+                  <button onClick={() => resetTranscript()}>Reset</button>
+                  <p>{transcript}</p>
               </div>
-              <button onClick={convertSpeechToText}>Record Answer</button>
-            </div>
-          )
-        })}
-      </div>
-      <div>
-        <p>Microphone: {listening ? 'on' : 'off'}</p>
-        <button onClick={() => SpeechRecognition.startListening()}>Start</button>
-        <button onClick={() => SpeechRecognition.stopListening()}>Stop</button>
-        <button onClick={() => resetTranscript()}>Reset</button>
-        <p>{transcript}</p>
-      </div>
+              <button onClick={() => generateFeedback()}>Generate Feedback</button>
+          </div>
+      }
+      {feedback &&
+          <div>
+              <h3>Feedback:</h3>
+              <p>{feedback}</p>
+          </div>
+      }
     </main>
   )
 }
