@@ -48,7 +48,7 @@ const InterviewCard: FC<InterviewCardProps> = ({interviewQuestion}) => {
 
   return (
     <InterviewCardContainer>
-      <Card style={{height: "500px", width: "500px", overflow: "scroll"}}>
+      <Card style={{height: "500px", width: "500px"}}>
         <CardContent>
           <InterviewQuestion interviewQuestion={interviewQuestion}></InterviewQuestion>
           {interviewQuestion &&
