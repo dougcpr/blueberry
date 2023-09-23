@@ -1,14 +1,15 @@
 import React, {FC, useEffect} from "react";
 import Card from '@mui/material/Card';
-import styled, {keyframes} from "styled-components";
+import styled from "styled-components";
 import InterviewQuestion from "@/app/components/interview/interviewQuestion";
 import SpeechRecognition, {useSpeechRecognition} from "react-speech-recognition";
-import MicIcon from '@mui/icons-material/Mic';
-import {Button, IconButton} from "@mui/material";
-import {MicOff} from "@mui/icons-material";
+import GradingIcon from '@mui/icons-material/Grading';
+import RecordVoiceOverIcon from '@mui/icons-material/RecordVoiceOver';
+import {Button, CardActions, IconButton} from "@mui/material";
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import CardContent from "@mui/material/CardContent";
 import {completeResponse} from "@/app/lib/shared/helper";
+import {MicOff} from "@mui/icons-material";
 
 const InterviewCardContainer = styled.div`
   display: grid;
@@ -18,8 +19,13 @@ const InterviewCardContainer = styled.div`
 const InterviewButtonGroup = styled.div`
   display: grid;
   grid-template-rows: 3rem;
-  grid-template-columns: 5rem 5rem 1fr;
+  grid-template-columns: 3rem 3rem 1fr;
   grid-column-gap: 1rem;
+`
+
+const NoInterviewQuestionBlockText = styled.div`
+  color: slategray;
+  text-align: center;
 `
 
 type InterviewCardProps = {
@@ -44,7 +50,7 @@ const InterviewCard: FC<InterviewCardProps> = ({interviewQuestion, setFeedback})
   useEffect(() => {
     resetTranscript()
     setFeedback(undefined)
-  }, [interviewQuestion, resetTranscript])
+  }, [interviewQuestion, resetTranscript, setFeedback])
 
   function generateFeedbackPrompt() {
     const feedbackContext = `Assume you are a strict pessimistic, hiring manager for React Developer.`
@@ -57,19 +63,25 @@ const InterviewCard: FC<InterviewCardProps> = ({interviewQuestion, setFeedback})
       <Card style={{width: "100%", overflow: "scroll"}}>
         <CardContent style={{transition: "0.3s"}}>
           <InterviewQuestion interviewQuestion={interviewQuestion}></InterviewQuestion>
-          {interviewQuestion &&
-              <div>
-                <InterviewButtonGroup>
-                  {!listening ?
-                    <IconButton onClick={() => SpeechRecognition.startListening()}><MicIcon /></IconButton> :
-                    <IconButton onClick={() => SpeechRecognition.stopListening()}><MicOff /></IconButton>
-                  }
-                  <IconButton onClick={() => resetTranscript()}><RestartAltIcon /></IconButton>
-                  <Button disabled={transcript === ''} variant="contained" onClick={generateFeedback}>Generate Feedback</Button>
-                </InterviewButtonGroup>
-              </div>
-          }
+          {!interviewQuestion &&
+          <NoInterviewQuestionBlockText>
+              Enter a role and create an interview question <br/>or<br/> Upload a job description
+          </NoInterviewQuestionBlockText>}
         </CardContent>
+        <CardActions style={{justifyContent: "space-between", display: "flex"}}>
+          {interviewQuestion &&
+              <>
+                  <InterviewButtonGroup>
+                    {!listening ?
+                      <IconButton onClick={() => SpeechRecognition.startListening()}><MicOff/></IconButton> :
+                      <IconButton onClick={() => SpeechRecognition.stopListening()}><RecordVoiceOverIcon/></IconButton>
+                    }
+                      <IconButton onClick={() => resetTranscript()}><RestartAltIcon /></IconButton>
+                  </InterviewButtonGroup>
+                  <Button disabled={transcript === ''} color="success" variant="contained" onClick={generateFeedback}><GradingIcon /></Button>
+              </>
+          }
+        </CardActions>
       </Card>
     </InterviewCardContainer>
   )

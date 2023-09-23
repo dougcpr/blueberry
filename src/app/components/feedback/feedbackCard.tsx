@@ -3,6 +3,8 @@ import Card from '@mui/material/Card';
 import styled from "styled-components";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
+import {Button, CardActions} from "@mui/material";
+import SaveIcon from '@mui/icons-material/Save';
 
 const FeedbackCardContainer = styled.div`
   display: grid;
@@ -14,6 +16,9 @@ type FeedbackCardProps = {
 };
 
 const FeedbackCard: FC<FeedbackCardProps> = ({feedback}) => {
+  if (!feedback) {
+    return <></>
+  }
   return (
     <FeedbackCardContainer>
       <Card style={{maxHeight: "15rem", width: "100%", overflow: "scroll"}}>
@@ -21,12 +26,13 @@ const FeedbackCard: FC<FeedbackCardProps> = ({feedback}) => {
           <Typography variant="h5" color="text.secondary" gutterBottom>
             Feedback
           </Typography>
-          {feedback &&
             <Typography variant="body2">
               {feedback}
             </Typography>
-          }
         </CardContent>
+        <CardActions>
+          <Button variant="contained"><SaveIcon /></Button>
+        </CardActions>
       </Card>
     </FeedbackCardContainer>
   )

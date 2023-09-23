@@ -7,14 +7,9 @@ type InterviewCardProps = {
 
 const InterviewQuestion: FC<InterviewCardProps> = ({interviewQuestion}) => {
   return (
-    <>
-      <Typography variant="h5" color="text.secondary" gutterBottom>
-        Interview Question
-      </Typography>
-      <Typography variant="body2">
-        {interviewQuestion}
-      </Typography>
-    </>
+    <Typography variant="body2">
+      {interviewQuestion}
+    </Typography>
   )
 }
 
