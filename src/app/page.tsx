@@ -1,14 +1,15 @@
 'use client';
 import 'regenerator-runtime/runtime'
 import React, {useEffect, useState} from "react";
-import Header from "@/app/components/header";
+import InterviewOptions from "@/app/components/interview/interviewOptions";
 import InterviewCard from "@/app/components/interview/interviewCard";
 import styled from "styled-components";
 
 
 const Main = styled.main`
   display: grid;
-  grid-template-rows: 3rem calc(100vh - 7rem) 3rem;
+  grid-row-gap: 1rem;
+  grid-template-rows: 1fr calc(100vh - 7rem) 3rem;
 `
 
 function Home() {
@@ -27,7 +28,7 @@ function Home() {
 
   return (
     <Main>
-      <Header setInterviewQuestion={setInterviewQuestion}/>
+      <InterviewOptions setInterviewQuestion={setInterviewQuestion}/>
       <InterviewCard interviewQuestion={interviewQuestion}/>
     </Main>
   )
