@@ -65,7 +65,7 @@ const InterviewCard: FC<InterviewCardProps> = ({interviewQuestion, setFeedback})
           <InterviewQuestion interviewQuestion={interviewQuestion}></InterviewQuestion>
           {!interviewQuestion &&
           <NoInterviewQuestionBlockText>
-              Enter a role and create an interview question <br/>or<br/> Upload a job description
+              Enter a role and return an interview question <br/>or<br/> Upload a job description
           </NoInterviewQuestionBlockText>}
         </CardContent>
         <CardActions style={{justifyContent: "space-between", display: "flex"}}>
