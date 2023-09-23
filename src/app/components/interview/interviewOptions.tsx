@@ -1,7 +1,8 @@
 import React, {FC} from "react";
-import {Button, Card} from "@mui/material";
+import {Button} from "@mui/material";
 import styled from "styled-components";
 import {completeResponse} from "@/app/lib/shared/helper";
+import {FileUpload} from "@mui/icons-material";
 
 type InterviewOptionsProps = {
   setInterviewQuestion: any;
@@ -9,22 +10,7 @@ type InterviewOptionsProps = {
 
 const InterviewPrompt = styled.div`
   display: flex;
-  grid-column-gap: 1rem;
-  justify-content: center;
-`
-
-const InterviewStyleChoice = styled(Card)`
-  display: grid;
-  height: 13rem;
-  padding: 1rem;
-  width: 13rem;
-  grid-gap: 1rem;
-`
-
-const UploadFakeBorder = styled.div`
-  border: 0.25rem dashed grey;
-  display: grid;
-  place-items: center;
+  justify-content: space-between;
 `
 
 const InterviewOptions: FC<InterviewOptionsProps> = ({setInterviewQuestion}) => {
@@ -47,14 +33,11 @@ const InterviewOptions: FC<InterviewOptionsProps> = ({setInterviewQuestion}) => 
   }
   return (
       <InterviewPrompt>
-        <InterviewStyleChoice>
-          <h4>Position: React Developer <span style={{'color': 'gray'}}>with</span> Doug Cooper</h4>
-          <Button onClick={generateInterviewQuestion} size="medium" variant="contained">Generate Interview Question</Button>
-        </InterviewStyleChoice>
-        <InterviewStyleChoice>
-          <UploadFakeBorder>?</UploadFakeBorder>
-          <Button size="medium" variant="contained">Upload Job Description</Button>
-        </InterviewStyleChoice>
+        <Button onClick={generateInterviewQuestion} size="medium" variant="contained">Create Interview Question</Button>
+        <Button color="primary" variant="contained">
+          <FileUpload sx={{ mr: 1 }} />
+          Upload
+        </Button>
       </InterviewPrompt>
   )
 }
