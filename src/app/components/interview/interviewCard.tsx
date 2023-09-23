@@ -15,25 +15,12 @@ const InterviewCardContainer = styled.div`
   place-items: center;
 `
 
-const InterviewButtongGroup = styled.div`
+const InterviewButtonGroup = styled.div`
   display: grid;
   grid-template-rows: 3rem;
   grid-template-columns: 5rem 5rem 1fr;
   grid-column-gap: 1rem;
 `
-
-const fadeIn = keyframes`
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-`;
-
-const FadingText = styled.div`
-  animation: ${fadeIn} 1s ease-in-out; /* Adjust the duration and timing function as needed */
-`;
 
 type InterviewCardProps = {
   interviewQuestion: string | undefined;
@@ -72,14 +59,14 @@ const InterviewCard: FC<InterviewCardProps> = ({interviewQuestion, setFeedback})
           <InterviewQuestion interviewQuestion={interviewQuestion}></InterviewQuestion>
           {interviewQuestion &&
               <div>
-                <InterviewButtongGroup>
+                <InterviewButtonGroup>
                   {!listening ?
                     <IconButton onClick={() => SpeechRecognition.startListening()}><MicIcon /></IconButton> :
                     <IconButton onClick={() => SpeechRecognition.stopListening()}><MicOff /></IconButton>
                   }
                   <IconButton onClick={() => resetTranscript()}><RestartAltIcon /></IconButton>
                   <Button disabled={transcript === ''} variant="contained" onClick={generateFeedback}>Generate Feedback</Button>
-                </InterviewButtongGroup>
+                </InterviewButtonGroup>
               </div>
           }
         </CardContent>
