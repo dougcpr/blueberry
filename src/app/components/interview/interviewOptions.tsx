@@ -92,14 +92,14 @@ const InterviewOptions: FC<InterviewOptionsProps> = ({setInterviewQuestion, setC
         </Box>
       </InterviewPrompt>
       <LoadingButton
-        disabled={role === ''}
+        disabled={role === '' || conversation.length === 5}
         loading={loading}
         onClick={generateInterviewQuestion}
         variant="contained">
         <p>Ask
           {conversation.length == 0 && <span> a </span>}
           {conversation.length > 0 && <span> Another </span>}
-          Question
+          Question ({conversation.length}/5)
         </p>
       </LoadingButton>
       <Fab style={{position: "absolute", right: "1rem", bottom: "1rem"}} color="primary" aria-label="add">
