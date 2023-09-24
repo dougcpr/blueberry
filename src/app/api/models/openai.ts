@@ -10,9 +10,27 @@ export type OpenAIModelMetaData = {
   permission: any;
 }
 
+export type Message = {
+  role: Role;
+  content: string;
+  function_call?: FunctionCall
+}
+
+export enum Role {
+  system = "system",
+  user = "user",
+  assistant = "assistant",
+  function = "function"
+}
+
+export type FunctionCall = {
+  name: string;
+  arguments: string;
+}
+
 export type OpenAIPayload = {
   model: string;
-  prompt: string;
+  messages: Message[];
   temperature: number;
   top_p: number;
   frequency_penalty: number;

@@ -7,11 +7,14 @@ import {FileUpload} from "@mui/icons-material";
 import Box from '@mui/material/Box';
 import Slider from '@mui/material/Slider';
 import Typography from "@mui/material/Typography";
+import {Message, Role} from "@/app/api/models/openai";
 
 type InterviewOptionsProps = {
   setInterviewQuestion: any;
   setConversation: any;
-  conversation: string[];
+  setRole: any;
+  role: string;
+  conversation: Message[];
 };
 
 const InterviewPrompt = styled.div`
@@ -42,32 +45,45 @@ function valuetext(value: number) {
   return `${value} years`;
 }
 
-const InterviewOptions: FC<InterviewOptionsProps> = ({setInterviewQuestion, setConversation, conversation}) => {
-  const [role, setRole] = useState<string>("");
-  const [experience, setExperience] = useState<number | number[]>(0);
+const InterviewOptions: FC<InterviewOptionsProps> = ({setInterviewQuestion, setConversation, setRole, role, conversation}) => {
+  const [experience, setExperience] = useState<number | number[]>(2);
   const [loading, setLoading] = useState<boolean>(false);
   async function generateInterviewQuestion() {
+    let message: Message[] = [{
+      role: Role.user,
+      content: ``
+    }]
     setInterviewQuestion(undefined)
     setLoading(true);
     try {
-      let prompt = generateInterviewPrompt()
-      const res = await completeResponse(prompt)
-      const text = res.choices[0].text
-      console.log(text)
-      setInterviewQuestion(text)
-      setConversation([...conversation, text])
+      if (conversation.length === 0) {
+        message = generateInitialMessage();
+      } else {
+        const additionalMessage: Message = {
+          role: Role.user,
+          content: `Ask me another question, please.`
+        }
+        message = [...conversation, additionalMessage]
+      }
     } catch (e) {
       console.error(e)
-      setInterviewQuestion("This is an offline interview prompt.")
+      setInterviewQuestion("This was an error generating your prompt.")
     } finally {
+      const res = await completeResponse(message)
+      const text = res.choices[0].message.content
+      setConversation([...conversation, res.choices[0].message])
+      setInterviewQuestion(text)
       setLoading(false);
     }
   }
 
-  function generateInterviewPrompt() {
-    console.log(conversation);
-    const feedbackContext = `Assume you are a hiring manager for ${role}.`
-    return`${feedbackContext} Ask 1 question to the interviewee given the user has ${experience} years of experience. Do not ask a question like ${conversation}.`
+  function generateInitialMessage() {
+    const interviewContext = `Assume you are a hiring manager for ${role}.`
+    let newMessage: Message[] = [{
+      role: Role.user,
+      content: `${interviewContext} Ask me 1 question given I have ${experience} years of experience.`
+    }]
+    return newMessage
   }
   return (
     <>
@@ -83,7 +99,7 @@ const InterviewOptions: FC<InterviewOptionsProps> = ({setInterviewQuestion, setC
           <Slider
             aria-label="Experience"
             valueLabelDisplay="auto"
-            defaultValue={2}
+            defaultValue={experience}
             getAriaValueText={valuetext}
             marks={marks}
             max={10}

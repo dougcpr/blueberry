@@ -21,9 +21,10 @@ const Main = styled.main`
 
 function Home() {
   const [loading, setLoading] = useState(false)
+  const [role, setRole] = useState<string>("");
   const [interviewQuestion, setInterviewQuestion] = useState(undefined)
   const [conversation, setConversation] = useState([]);
-  const [feedback, setFeedback] = useState(undefined)
+  const [feedback, setFeedback] = useState<string>('')
 
   useEffect(() => {
     setLoading(true)
@@ -38,11 +39,19 @@ function Home() {
   return (
     <Main>
       <InterviewOptions
+        role={role}
+        setRole={setRole}
         conversation={conversation}
         setConversation={setConversation}
         setInterviewQuestion={setInterviewQuestion}/>
-      <InterviewCard setFeedback={setFeedback} interviewQuestion={interviewQuestion}/>
-      <FeedbackCard feedback={feedback} />
+      <InterviewCard
+        conversation={conversation}
+        setConversation={setConversation}
+        setFeedback={setFeedback}
+        interviewQuestion={interviewQuestion}
+        role={role}/>
+      <FeedbackCard
+        feedback={feedback} />
     </Main>
   )
 }

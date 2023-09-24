@@ -1,4 +1,4 @@
-import React, {FC, useEffect} from "react";
+import React, {FC, useEffect, useState} from "react";
 import Card from '@mui/material/Card';
 import styled from "styled-components";
 import InterviewQuestion from "@/app/components/interview/interviewQuestion";
@@ -10,6 +10,8 @@ import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import CardContent from "@mui/material/CardContent";
 import {completeResponse} from "@/app/lib/shared/helper";
 import {MicOff} from "@mui/icons-material";
+import {Message, Role} from "@/app/api/models/openai";
+import LoadingButton from "@mui/lab/LoadingButton";
 
 const InterviewCardContainer = styled.div`
   display: grid;
@@ -31,10 +33,14 @@ const NoInterviewQuestionBlockText = styled.div`
 type InterviewCardProps = {
   interviewQuestion: string | undefined;
   setFeedback: any;
+  role: string;
+  conversation: Message[];
+  setConversation: any;
 };
 
 
-const InterviewCard: FC<InterviewCardProps> = ({interviewQuestion, setFeedback}) => {
+const InterviewCard: FC<InterviewCardProps> = ({interviewQuestion, setFeedback, role, conversation, setConversation}) => {
+  const [loading, setLoading] = useState<boolean>(false)
   let {
     transcript,
     listening,
@@ -42,9 +48,11 @@ const InterviewCard: FC<InterviewCardProps> = ({interviewQuestion, setFeedback})
   } = useSpeechRecognition();
 
   async function generateFeedback() {
-    const prompt = generateFeedbackPrompt()
-    const res = await completeResponse(prompt)
-    setFeedback(res.choices[0].text)
+    setLoading(true)
+    const messages = generateFeedbackPrompt()
+    const res = await completeResponse(messages)
+    setFeedback(res.choices[0].message.content)
+    setLoading(false)
   }
 
   useEffect(() => {
@@ -53,9 +61,13 @@ const InterviewCard: FC<InterviewCardProps> = ({interviewQuestion, setFeedback})
   }, [interviewQuestion, resetTranscript, setFeedback])
 
   function generateFeedbackPrompt() {
-    const feedbackContext = `Assume you are a strict pessimistic, hiring manager for React Developer.`
-    return `${feedbackContext} give areas of improvement to the interviewee.  If there is anything positive, mention it.
+    const feedbackContext = `Assume you are a hiring manager for the ${role}.`
+    let newMessage: Message = {
+      role: Role.user,
+      content: `${feedbackContext} give me areas of improvement.  If there is anything positive, mention it.
     The response the user gave is ${transcript}. Tell the interviewee if they pass or fail the question.`
+    }
+    return [...conversation, newMessage]
   }
 
   return (
@@ -78,7 +90,14 @@ const InterviewCard: FC<InterviewCardProps> = ({interviewQuestion, setFeedback})
                     }
                       <IconButton onClick={() => resetTranscript()}><RestartAltIcon /></IconButton>
                   </InterviewButtonGroup>
-                  <Button disabled={transcript === ''} color="success" variant="contained" onClick={generateFeedback}><GradingIcon /></Button>
+                  <LoadingButton
+                      loading={loading}
+                      disabled={transcript === '' || loading}
+                      color="success"
+                      variant="contained"
+                      onClick={generateFeedback}>
+                      <GradingIcon />
+                  </LoadingButton>
               </>
           }
         </CardActions>

@@ -1,9 +1,10 @@
-export async function completeResponse(prompt: string) {
-  console.log(prompt)
+import {Message} from "@/app/api/models/openai";
+
+export async function completeResponse(messages: Message[]) {
   const response = await fetch("/api/generate", {
     method: "POST",
     headers: {"Content-Type": "application/json",},
-    body: JSON.stringify({prompt}),
+    body: JSON.stringify({messages}),
   });
 
   if (!response.ok) {
