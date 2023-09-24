@@ -8,6 +8,8 @@ import Box from '@mui/material/Box';
 import Slider from '@mui/material/Slider';
 import Typography from "@mui/material/Typography";
 import {Message, Role} from "@/app/api/models/openai";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
 
 type InterviewOptionsProps = {
   setInterviewQuestion: any;
@@ -86,42 +88,45 @@ const InterviewOptions: FC<InterviewOptionsProps> = ({setInterviewQuestion, setC
     return newMessage
   }
   return (
-    <>
-      <InterviewPrompt>
-        <TextField
-          style={{alignSelf: "center"}}
-          id="outlined-basic"
-          label="Role"
-          variant="outlined"
-          onChange={(e) => setRole(e.target.value)}  />
-        <Box sx={{ width: 225 }}>
-          <Typography gutterBottom>Experience</Typography>
-          <Slider
-            aria-label="Experience"
-            valueLabelDisplay="auto"
-            defaultValue={experience}
-            getAriaValueText={valuetext}
-            marks={marks}
-            max={10}
-            onChange={(_, newExp) => {setExperience(newExp)}}
-          />
-        </Box>
-      </InterviewPrompt>
-      <LoadingButton
-        disabled={role === '' || conversation.length === 5}
-        loading={loading}
-        onClick={generateInterviewQuestion}
-        variant="contained">
-        <p>Ask
-          {conversation.length == 0 && <span> a </span>}
-          {conversation.length > 0 && <span> Another </span>}
-          Question ({conversation.length}/5)
-        </p>
-      </LoadingButton>
-      <Fab style={{position: "absolute", right: "1rem", bottom: "1rem"}} color="primary" aria-label="add">
-        <FileUpload />
-      </Fab>
-    </>
+    <Card>
+      <CardContent>
+        <InterviewPrompt>
+          <TextField
+            style={{alignSelf: "center"}}
+            id="outlined-basic"
+            label="Role"
+            variant="outlined"
+            onChange={(e) => setRole(e.target.value)}  />
+          <Box sx={{ width: 225 }}>
+            <Typography gutterBottom>Experience</Typography>
+            <Slider
+              aria-label="Experience"
+              valueLabelDisplay="auto"
+              defaultValue={experience}
+              getAriaValueText={valuetext}
+              marks={marks}
+              max={10}
+              onChange={(_, newExp) => {setExperience(newExp)}}
+            />
+          </Box>
+        </InterviewPrompt>
+        <LoadingButton
+          style={{width: "-webkit-fill-available"}}
+          disabled={role === '' || conversation.length === 5}
+          loading={loading}
+          onClick={generateInterviewQuestion}
+          variant="contained">
+          <p>Ask
+            {conversation.length == 0 && <span> a </span>}
+            {conversation.length > 0 && <span> Another </span>}
+            Question ({conversation.length}/5)
+          </p>
+        </LoadingButton>
+        <Fab style={{position: "absolute", right: "1rem", bottom: "1rem"}} color="primary" aria-label="add">
+          <FileUpload />
+        </Fab>
+      </CardContent>
+    </Card>
   )
 }
 

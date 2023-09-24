@@ -5,7 +5,7 @@ import InterviewQuestion from "@/app/components/interview/interviewQuestion";
 import SpeechRecognition, {useSpeechRecognition} from "react-speech-recognition";
 import GradingIcon from '@mui/icons-material/Grading';
 import RecordVoiceOverIcon from '@mui/icons-material/RecordVoiceOver';
-import {Button, CardActions, IconButton} from "@mui/material";
+import {CardActions, IconButton} from "@mui/material";
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import CardContent from "@mui/material/CardContent";
 import {completeResponse} from "@/app/lib/shared/helper";
@@ -61,11 +61,10 @@ const InterviewCard: FC<InterviewCardProps> = ({interviewQuestion, setFeedback, 
   }, [interviewQuestion, resetTranscript, setFeedback])
 
   function generateFeedbackPrompt() {
-    const feedbackContext = `Assume you are a hiring manager for the ${role}.`
+    const feedbackContext = `You are a hiring manager for the ${role}. Do not give any mention you are a language model.`
     let newMessage: Message = {
       role: Role.user,
-      content: `${feedbackContext} give me areas of improvement.  If there is anything positive, mention it.
-    The response the user gave is ${transcript}. Tell the interviewee if they pass or fail the question.`
+      content: `${feedbackContext} Mention something positive and negative in 4 sentences. The response the I gave is ${transcript}. Also tell me if I pass or fail the question.`
     }
     return [...conversation, newMessage]
   }
@@ -77,7 +76,7 @@ const InterviewCard: FC<InterviewCardProps> = ({interviewQuestion, setFeedback, 
           <InterviewQuestion interviewQuestion={interviewQuestion}></InterviewQuestion>
           {!interviewQuestion &&
           <NoInterviewQuestionBlockText>
-              Enter a role and return an interview question <br/>or<br/> Upload a job description
+              Enter a role and ask a question <br/>or<br/> Upload a job description
           </NoInterviewQuestionBlockText>}
         </CardContent>
         <CardActions style={{justifyContent: "space-between", display: "flex"}}>

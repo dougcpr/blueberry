@@ -3,8 +3,9 @@ import 'regenerator-runtime/runtime'
 import React, {useEffect, useState} from "react";
 import InterviewOptions from "@/app/components/interview/interviewOptions";
 import InterviewCard from "@/app/components/interview/interviewCard";
-import styled from "styled-components";
+import styled, {ThemeProvider} from "styled-components";
 import FeedbackCard from "@/app/components/feedback/feedbackCard";
+import {darkTheme, GlobalStyles} from "@/app/lib/global-styles";
 
 
 const Main = styled.main`
@@ -37,22 +38,25 @@ function Home() {
   }
 
   return (
-    <Main>
-      <InterviewOptions
-        role={role}
-        setRole={setRole}
-        conversation={conversation}
-        setConversation={setConversation}
-        setInterviewQuestion={setInterviewQuestion}/>
-      <InterviewCard
-        conversation={conversation}
-        setConversation={setConversation}
-        setFeedback={setFeedback}
-        interviewQuestion={interviewQuestion}
-        role={role}/>
-      <FeedbackCard
-        feedback={feedback} />
-    </Main>
+    <ThemeProvider theme={darkTheme}>
+      <GlobalStyles />
+      <Main>
+        <InterviewOptions
+          role={role}
+          setRole={setRole}
+          conversation={conversation}
+          setConversation={setConversation}
+          setInterviewQuestion={setInterviewQuestion}/>
+        <InterviewCard
+          conversation={conversation}
+          setConversation={setConversation}
+          setFeedback={setFeedback}
+          interviewQuestion={interviewQuestion}
+          role={role}/>
+        <FeedbackCard
+          feedback={feedback} />
+      </Main>
+    </ThemeProvider>
   )
 }
 
