@@ -6,6 +6,7 @@ import InterviewCard from "@/app/components/interview/interviewCard";
 import styled, {ThemeProvider} from "styled-components";
 import FeedbackCard from "@/app/components/feedback/feedbackCard";
 import {darkTheme, GlobalStyles} from "@/app/lib/global-styles";
+import {APIChatResponse} from "@/app/api/models/interview";
 
 
 const Main = styled.main`
@@ -23,9 +24,9 @@ const Main = styled.main`
 function Home() {
   const [loading, setLoading] = useState(false)
   const [role, setRole] = useState<string>("");
-  const [interviewQuestion, setInterviewQuestion] = useState(undefined)
+  const [interviewQuestion, setInterviewQuestion] = useState<APIChatResponse>({message: '', status: false})
   const [conversation, setConversation] = useState([]);
-  const [feedback, setFeedback] = useState<string>('')
+  const [feedback, setFeedback] = useState<APIChatResponse>({message: '', status: false})
 
   useEffect(() => {
     setLoading(true)

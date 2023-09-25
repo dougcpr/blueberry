@@ -1,17 +1,16 @@
 import React, {FC, useEffect, useState} from "react";
 import Card from '@mui/material/Card';
 import styled from "styled-components";
-import InterviewQuestion from "@/app/components/interview/interviewQuestion";
 import SpeechRecognition, {useSpeechRecognition} from "react-speech-recognition";
 import GradingIcon from '@mui/icons-material/Grading';
-import RecordVoiceOverIcon from '@mui/icons-material/RecordVoiceOver';
-import {CardActions, IconButton} from "@mui/material";
+import {Button, CardActions} from "@mui/material";
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import CardContent from "@mui/material/CardContent";
 import {completeResponse} from "@/app/lib/shared/helper";
-import {MicOff} from "@mui/icons-material";
 import {Message, Role} from "@/app/api/models/openai";
 import LoadingButton from "@mui/lab/LoadingButton";
+import {APIChatResponse} from "@/app/api/models/interview";
+import Typography from "@mui/material/Typography";
 
 const InterviewCardContainer = styled.div`
   display: grid;
@@ -20,8 +19,7 @@ const InterviewCardContainer = styled.div`
 
 const InterviewButtonGroup = styled.div`
   display: grid;
-  grid-template-rows: 3rem;
-  grid-template-columns: 3rem 3rem 1fr;
+  grid-template-columns: 5rem 3rem 1fr;
   grid-column-gap: 1rem;
 `
 
@@ -31,15 +29,15 @@ const NoInterviewQuestionBlockText = styled.div`
 `
 
 type InterviewCardProps = {
-  interviewQuestion: string | undefined;
-  setFeedback: any;
-  role: string;
   conversation: Message[];
+  interviewQuestion: APIChatResponse;
+  role: string;
   setConversation: any;
+  setFeedback: any;
 };
 
 
-const InterviewCard: FC<InterviewCardProps> = ({interviewQuestion, setFeedback, role, conversation, setConversation}) => {
+const InterviewCard: FC<InterviewCardProps> = ({interviewQuestion, setFeedback, role, conversation}) => {
   const [loading, setLoading] = useState<boolean>(false)
   let {
     transcript,
@@ -51,7 +49,7 @@ const InterviewCard: FC<InterviewCardProps> = ({interviewQuestion, setFeedback, 
     setLoading(true)
     const messages = generateFeedbackPrompt()
     const res = await completeResponse(messages)
-    setFeedback(res.choices[0].message.content)
+    setFeedback({returnedMessage: res.choices[0].message.content, status: true})
     setLoading(false)
   }
 
@@ -60,7 +58,7 @@ const InterviewCard: FC<InterviewCardProps> = ({interviewQuestion, setFeedback, 
     setFeedback(undefined)
   }, [interviewQuestion, resetTranscript, setFeedback])
 
-  function generateFeedbackPrompt() {
+  const generateFeedbackPrompt = () => {
     const feedbackContext = `You are a hiring manager for the ${role}. Do not give any mention you are a language model.`
     let newMessage: Message = {
       role: Role.user,
@@ -73,30 +71,29 @@ const InterviewCard: FC<InterviewCardProps> = ({interviewQuestion, setFeedback, 
     <InterviewCardContainer>
       <Card style={{width: "100%", overflow: "scroll"}}>
         <CardContent style={{transition: "0.3s"}}>
-          <InterviewQuestion interviewQuestion={interviewQuestion}></InterviewQuestion>
-          {!interviewQuestion &&
+          {interviewQuestion.message && <Typography variant="body2">
+            {interviewQuestion.message}
+          </Typography>}
+          {!interviewQuestion.status &&
           <NoInterviewQuestionBlockText>
               Enter a role and ask a question <br/>or<br/> Upload a job description
           </NoInterviewQuestionBlockText>}
         </CardContent>
         <CardActions style={{justifyContent: "space-between", display: "flex"}}>
-          {interviewQuestion &&
+          {interviewQuestion.status &&
               <>
-                  <InterviewButtonGroup>
-                    {!listening ?
-                      <IconButton onClick={() => SpeechRecognition.startListening()}><MicOff/></IconButton> :
-                      <IconButton onClick={() => SpeechRecognition.stopListening()}><RecordVoiceOverIcon/></IconButton>
-                    }
-                      <IconButton onClick={() => resetTranscript()}><RestartAltIcon /></IconButton>
-                  </InterviewButtonGroup>
-                  <LoadingButton
-                      loading={loading}
-                      disabled={transcript === '' || loading}
-                      color="success"
-                      variant="contained"
-                      onClick={generateFeedback}>
-                      <GradingIcon />
-                  </LoadingButton>
+                <InterviewButtonGroup>
+                    <LoadingButton variant="contained" loading={listening} onClick={() => SpeechRecognition.startListening()}>Record</LoadingButton>
+                    <Button variant="outlined" onClick={() => resetTranscript()}><RestartAltIcon color="primary" /></Button>
+                </InterviewButtonGroup>
+                <LoadingButton
+                    loading={loading}
+                    disabled={transcript === '' || loading}
+                    color="success"
+                    variant="contained"
+                    onClick={generateFeedback}>
+                    <GradingIcon />
+                </LoadingButton>
               </>
           }
         </CardActions>

@@ -51,30 +51,27 @@ const InterviewOptions: FC<InterviewOptionsProps> = ({setInterviewQuestion, setC
   const [experience, setExperience] = useState<number | number[]>(2);
   const [loading, setLoading] = useState<boolean>(false);
   async function generateInterviewQuestion() {
-    let message: Message[] = [{
-      role: Role.user,
-      content: ``
-    }]
-    setInterviewQuestion(undefined)
+    let message: Message[]
+    setInterviewQuestion({returnedMessage: '', status: false})
     setLoading(true);
-    try {
-      if (conversation.length === 0) {
-        message = generateInitialMessage();
-      } else {
-        const additionalMessage: Message = {
-          role: Role.user,
-          content: `Ask me another question, please.`
-        }
-        message = [...conversation, additionalMessage]
+    if (conversation.length === 0) {
+      message = generateInitialMessage();
+    } else {
+      const additionalMessage: Message = {
+        role: Role.user,
+        content: `Ask me another question, please.`
       }
+      message = [...conversation, additionalMessage]
+    }
+    try {
+      const res = await completeResponse(message)
+      const returnedMessage = res.choices[0].message.content
+      setConversation([...conversation, res.choices[0].message])
+      setInterviewQuestion({returnedMessage, status: true})
     } catch (e) {
       console.error(e)
-      setInterviewQuestion("This was an error generating your prompt.")
+      setInterviewQuestion({returnedMessage: "This was an error generating your prompt.", status: false})
     } finally {
-      const res = await completeResponse(message)
-      const text = res.choices[0].message.content
-      setConversation([...conversation, res.choices[0].message])
-      setInterviewQuestion(text)
       setLoading(false);
     }
   }
