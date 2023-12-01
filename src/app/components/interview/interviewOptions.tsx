@@ -70,7 +70,9 @@ const InterviewOptions: FC<InterviewOptionsProps> = ({setInterviewQuestion, setC
       setInterviewQuestion({returnedMessage, status: true})
     } catch (e) {
       console.error(e)
-      setInterviewQuestion({returnedMessage: "This was an error generating your prompt.", status: false})
+      // for now take widow alert??
+      window.alert(e)
+      // TODO: create toast notification?
     } finally {
       setLoading(false);
     }
@@ -113,7 +115,7 @@ const InterviewOptions: FC<InterviewOptionsProps> = ({setInterviewQuestion, setC
           loading={loading}
           onClick={generateInterviewQuestion}
           variant="contained">
-          <p>Ask
+          <p>Generate
             {conversation.length == 0 && <span> a </span>}
             {conversation.length > 0 && <span> Another </span>}
             Question ({conversation.length}/5)

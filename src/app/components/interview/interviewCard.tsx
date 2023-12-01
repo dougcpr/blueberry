@@ -76,7 +76,7 @@ const InterviewCard: FC<InterviewCardProps> = ({interviewQuestion, setFeedback, 
           </Typography>}
           {!interviewQuestion.status &&
           <NoInterviewQuestionBlockText>
-              Enter a role and ask a question <br/>or<br/> Upload a job description
+              Enter a role and generate a question <br/>or<br/> Upload a job description
           </NoInterviewQuestionBlockText>}
         </CardContent>
         <CardActions style={{justifyContent: "space-between", display: "flex"}}>
